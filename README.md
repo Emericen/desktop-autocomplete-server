@@ -5,19 +5,18 @@ Stateful FastAPI server wrapping vLLM for vision-language inference with session
 ## Quick Start
 
 ```bash
-# First time setup
-make install
-
 # Start services (vLLM + FastAPI)
-make start
+make up
 
 # Check logs
 make logs
 ```
 
-## Warmup (Important!)
+## Warmup
 
-After `make start`, run warmup to preload the vision processor before adding traffic routing:
+The API automatically warms up vLLM on startup. Compose ensures vLLM is healthy before starting the API container.
+
+To manually verify readiness:
 
 ```bash
 make warmup
@@ -42,18 +41,20 @@ sudo iptables -t nat -F PREROUTING
 
 | Endpoint | Method | Description |
 |----------|--------|-------------|
-| `/health` | GET | Health check |
-| `/add_action` | POST | Add action to session, get response |
-| `/predict` | POST | Get prediction without storing response |
-| `/compact` | POST | Summarize and compress session history |
+| `/health` | GET | Health check (returns API and vLLM status) |
+| `/predict` | POST | Add action to session, get prediction |
 
 ## Commands
 
 ```bash
-make start     # Start vLLM + FastAPI
-make stop      # Stop all services
+make up        # Start vLLM + FastAPI
+make down      # Stop all services
 make restart   # Restart all
 make logs      # Tail combined logs
-make warmup    # Preload vision processor
-make clean     # Remove everything
+make logs-vllm # Tail vLLM logs only
+make logs-api  # Tail API logs only
+make shell     # Shell into vLLM container
+make build     # Rebuild API container
+make warmup    # Check API readiness
+make clean     # Stop and remove images
 ```
