@@ -1,0 +1,1097 @@
+{
+  "startTime": "2026-01-25T19:52:00.373Z",
+  "endTime": "2026-01-25T19:59:30.808Z",
+  "actionCount": 120,
+  "actions": [
+    {
+      "id": "a1",
+      "type": "mouse_click",
+      "timestamp": 1769370722264,
+      "button": "left",
+      "x": 0.17935855263157896,
+      "y": 0.9512336269196026,
+      "screenshot": "img-001.jpg",
+      "recordedAt": 1769370722429
+    },
+    {
+      "id": "a2",
+      "type": "mouse_click",
+      "timestamp": 1769370725310,
+      "button": "left",
+      "x": 0.8611567982456141,
+      "y": 0.05827969738030714,
+      "screenshot": "img-002.jpg",
+      "recordedAt": 1769370725345
+    },
+    {
+      "id": "a3",
+      "type": "mouse_click",
+      "timestamp": 1769370726210,
+      "button": "left",
+      "x": 0.7522752192982456,
+      "y": 0.5123397978771455,
+      "screenshot": "img-003.jpg",
+      "recordedAt": 1769370726241
+    },
+    {
+      "id": "a4",
+      "type": "mouse_click",
+      "timestamp": 1769370728379,
+      "button": "left",
+      "x": 0.7573601973684211,
+      "y": 0.07448692976513098,
+      "screenshot": "img-004.jpg",
+      "recordedAt": 1769370728416
+    },
+    {
+      "id": "a5",
+      "type": "special_key",
+      "timestamp": 1769370729000,
+      "key": "Space",
+      "screenshot": "img-005.jpg",
+      "recordedAt": 1769370729015
+    },
+    {
+      "id": "a6",
+      "type": "mouse_click",
+      "timestamp": 1769370730251,
+      "button": "left",
+      "x": 0.3443690606725146,
+      "y": 0.10832345302619693,
+      "screenshot": "img-006.jpg",
+      "recordedAt": 1769370730288
+    },
+    {
+      "id": "a7",
+      "type": "mouse_click",
+      "timestamp": 1769370730905,
+      "button": "left",
+      "x": 0.4474141081871345,
+      "y": 0.4611421635049684,
+      "screenshot": "img-007.jpg",
+      "recordedAt": 1769370730937
+    },
+    {
+      "id": "a8",
+      "type": "mouse_click",
+      "timestamp": 1769370733038,
+      "button": "left",
+      "x": 0.4474141081871345,
+      "y": 0.4611421635049684,
+      "screenshot": "img-008.jpg",
+      "recordedAt": 1769370733067
+    },
+    {
+      "id": "a9",
+      "type": "hotkey",
+      "timestamp": 1769370733371,
+      "modifiers": [
+        "command"
+      ],
+      "key": "3",
+      "screenshot": "img-009.jpg",
+      "recordedAt": 1769370733395
+    },
+    {
+      "id": "a10",
+      "type": "mouse_click",
+      "timestamp": 1769370734442,
+      "button": "left",
+      "x": 0.2367530153508772,
+      "y": 0.3287778060072267,
+      "screenshot": "img-010.jpg",
+      "recordedAt": 1769370734467
+    },
+    {
+      "id": "a11",
+      "type": "typing",
+      "timestamp": 1769370736296,
+      "text": "Yuedi Liang",
+      "screenshot": "img-011.jpg",
+      "recordedAt": 1769370736323
+    },
+    {
+      "id": "a22",
+      "type": "special_key",
+      "timestamp": 1769370736568,
+      "key": "Tab",
+      "screenshot": "img-012.jpg",
+      "recordedAt": 1769370736590
+    },
+    {
+      "id": "a23",
+      "type": "typing",
+      "timestamp": 1769370743073,
+      "text": "eddyliang216@gmail.com",
+      "screenshot": "img-013.jpg",
+      "recordedAt": 1769370743098
+    },
+    {
+      "id": "a45",
+      "type": "special_key",
+      "timestamp": 1769370743459,
+      "key": "Tab",
+      "screenshot": "img-014.jpg",
+      "recordedAt": 1769370743486
+    },
+    {
+      "id": "a46",
+      "type": "typing",
+      "timestamp": 1769370745942,
+      "text": "6264295321",
+      "screenshot": "img-015.jpg",
+      "recordedAt": 1769370745943
+    },
+    {
+      "id": "a56",
+      "type": "special_key",
+      "timestamp": 1769370747234,
+      "key": "Tab",
+      "screenshot": "img-016.jpg",
+      "recordedAt": 1769370747260
+    },
+    {
+      "id": "a57",
+      "type": "hotkey",
+      "timestamp": 1769370748876,
+      "modifiers": [
+        "command"
+      ],
+      "key": "t",
+      "screenshot": "img-017.jpg",
+      "recordedAt": 1769370748908
+    },
+    {
+      "id": "a58",
+      "type": "mouse_click",
+      "timestamp": 1769370749931,
+      "button": "left",
+      "x": 0.5457076937134503,
+      "y": 0.5723026761517616,
+      "screenshot": "img-018.jpg",
+      "recordedAt": 1769370749954
+    },
+    {
+      "id": "a59",
+      "type": "mouse_click",
+      "timestamp": 1769370753045,
+      "button": "left",
+      "x": 0.203015350877193,
+      "y": 0.29252060749774167,
+      "screenshot": "img-019.jpg",
+      "recordedAt": 1769370753066
+    },
+    {
+      "id": "a60",
+      "type": "mouse_click",
+      "timestamp": 1769370754242,
+      "button": "left",
+      "x": 0.2627832602339181,
+      "y": 0.10024277326106594,
+      "screenshot": "img-020.jpg",
+      "recordedAt": 1769370754262
+    },
+    {
+      "id": "a61",
+      "type": "hotkey",
+      "timestamp": 1769370754558,
+      "modifiers": [
+        "command"
+      ],
+      "key": "c",
+      "screenshot": "img-021.jpg",
+      "recordedAt": 1769370754588
+    },
+    {
+      "id": "a62",
+      "type": "hotkey",
+      "timestamp": 1769370754911,
+      "modifiers": [
+        "command"
+      ],
+      "key": "w",
+      "screenshot": "img-022.jpg",
+      "recordedAt": 1769370754937
+    },
+    {
+      "id": "a63",
+      "type": "hotkey",
+      "timestamp": 1769370755682,
+      "modifiers": [
+        "command"
+      ],
+      "key": "v",
+      "screenshot": "img-023.jpg",
+      "recordedAt": 1769370755707
+    },
+    {
+      "id": "a64",
+      "type": "mouse_click",
+      "timestamp": 1769370756186,
+      "button": "left",
+      "x": 0.24311951754385966,
+      "y": 0.5922397244805782,
+      "screenshot": "img-024.jpg",
+      "recordedAt": 1769370756220
+    },
+    {
+      "id": "a65",
+      "type": "mouse_click",
+      "timestamp": 1769370756628,
+      "button": "left",
+      "x": 0.25346308479532165,
+      "y": 0.5734318541102078,
+      "screenshot": "img-025.jpg",
+      "recordedAt": 1769370756660
+    },
+    {
+      "id": "a66",
+      "type": "hotkey",
+      "timestamp": 1769370756969,
+      "modifiers": [
+        "command"
+      ],
+      "key": "t",
+      "screenshot": "img-026.jpg",
+      "recordedAt": 1769370756998
+    },
+    {
+      "id": "a67",
+      "type": "mouse_click",
+      "timestamp": 1769370757887,
+      "button": "left",
+      "x": 0.39120065789473685,
+      "y": 0.5951191282746161,
+      "screenshot": "img-027.jpg",
+      "recordedAt": 1769370757909
+    },
+    {
+      "id": "a68",
+      "type": "mouse_click",
+      "timestamp": 1769370759370,
+      "button": "left",
+      "x": 0.23258634868421052,
+      "y": 0.09144577122854562,
+      "screenshot": "img-028.jpg",
+      "recordedAt": 1769370759393
+    },
+    {
+      "id": "a69",
+      "type": "hotkey",
+      "timestamp": 1769370759840,
+      "modifiers": [
+        "command"
+      ],
+      "key": "c",
+      "screenshot": "img-029.jpg",
+      "recordedAt": 1769370759857
+    },
+    {
+      "id": "a70",
+      "type": "hotkey",
+      "timestamp": 1769370760174,
+      "modifiers": [
+        "command"
+      ],
+      "key": "w",
+      "screenshot": "img-030.jpg",
+      "recordedAt": 1769370760196
+    },
+    {
+      "id": "a71",
+      "type": "hotkey",
+      "timestamp": 1769370760904,
+      "modifiers": [
+        "command"
+      ],
+      "key": "v",
+      "screenshot": "img-031.jpg",
+      "recordedAt": 1769370760931
+    },
+    {
+      "id": "a72",
+      "type": "mouse_click",
+      "timestamp": 1769370761518,
+      "button": "left",
+      "x": 0.2438824926900585,
+      "y": 0.6376785512646793,
+      "screenshot": "img-032.jpg",
+      "recordedAt": 1769370761543
+    },
+    {
+      "id": "a73",
+      "type": "mouse_click",
+      "timestamp": 1769370763637,
+      "button": "left",
+      "x": 0.2199013157894737,
+      "y": 0.7381648035230353,
+      "screenshot": "img-033.jpg",
+      "recordedAt": 1769370763671
+    },
+    {
+      "id": "a74",
+      "type": "scroll",
+      "timestamp": 1769370764864,
+      "x": 0.08809393274853801,
+      "y": 0.7908480126467932,
+      "screenshot": "img-034.jpg",
+      "repeatCount": 14,
+      "recordedAt": 1769370764892
+    },
+    {
+      "id": "a88",
+      "type": "scroll",
+      "timestamp": 1769370766864,
+      "x": 0.08809393274853801,
+      "y": 0.7908480126467932,
+      "screenshot": "img-035.jpg",
+      "repeatCount": 13,
+      "recordedAt": 1769370766875
+    },
+    {
+      "id": "a101",
+      "type": "mouse_click",
+      "timestamp": 1769370767591,
+      "button": "left",
+      "x": 0.197859557748538,
+      "y": 0.746753613369467,
+      "screenshot": "img-036.jpg",
+      "recordedAt": 1769370767616
+    },
+    {
+      "id": "a102",
+      "type": "typing",
+      "timestamp": 1769370770370,
+      "text": "My friend ",
+      "screenshot": "img-037.jpg",
+      "recordedAt": 1769370770397
+    },
+    {
+      "id": "a116",
+      "type": "mouse_click",
+      "timestamp": 1769370784856,
+      "button": "left",
+      "x": 0.419702576754386,
+      "y": 0.9658176659891599,
+      "screenshot": "img-038.jpg",
+      "recordedAt": 1769370784899
+    },
+    {
+      "id": "a117",
+      "type": "mouse_click",
+      "timestamp": 1769370788603,
+      "button": "left",
+      "x": 0.4551078216374269,
+      "y": 0.09316776761517616,
+      "screenshot": "img-039.jpg",
+      "recordedAt": 1769370788640
+    },
+    {
+      "id": "a118",
+      "type": "typing",
+      "timestamp": 1769370853545,
+      "text": "Long Boyuan first got joined and introduced me. We were both looking to start our own company and was wondering around for a community. ",
+      "screenshot": "img-040.jpg",
+      "recordedAt": 1769370853569
+    },
+    {
+      "id": "a380",
+      "type": "mouse_drag",
+      "timestamp": 1769370856748,
+      "button": "left",
+      "startX": 0.5711188779239766,
+      "startY": 0.7537898035230353,
+      "endX": 0.6702828033625731,
+      "endY": 0.7499823565943993,
+      "screenshot": "img-041.jpg",
+      "recordedAt": 1769370856782
+    },
+    {
+      "id": "a381",
+      "type": "special_key",
+      "timestamp": 1769370856882,
+      "key": "Space",
+      "screenshot": "img-042.jpg",
+      "recordedAt": 1769370856913
+    },
+    {
+      "id": "a382",
+      "type": "typing",
+      "timestamp": 1769370857931,
+      "text": "had no",
+      "screenshot": "img-043.jpg",
+      "recordedAt": 1769370857944
+    },
+    {
+      "id": "a388",
+      "type": "special_key",
+      "timestamp": 1769370858763,
+      "key": "ArrowRight",
+      "screenshot": "img-044.jpg",
+      "recordedAt": 1769370858794
+    },
+    {
+      "id": "a389",
+      "type": "special_key",
+      "timestamp": 1769370860114,
+      "key": "ArrowRight",
+      "screenshot": "img-045.jpg",
+      "repeatCount": 11,
+      "recordedAt": 1769370860134
+    },
+    {
+      "id": "a400",
+      "type": "mouse_click",
+      "timestamp": 1769370862905,
+      "button": "left",
+      "x": 0.5638089364035088,
+      "y": 0.7562634089882565,
+      "screenshot": "img-046.jpg",
+      "repeatCount": 2,
+      "recordedAt": 1769370862930
+    },
+    {
+      "id": "a402",
+      "type": "special_key",
+      "timestamp": 1769370863232,
+      "key": "Delete",
+      "screenshot": "img-047.jpg",
+      "recordedAt": 1769370863262
+    },
+    {
+      "id": "a403",
+      "type": "special_key",
+      "timestamp": 1769370863557,
+      "key": "Delete",
+      "screenshot": "img-048.jpg",
+      "recordedAt": 1769370863586
+    },
+    {
+      "id": "a404",
+      "type": "typing",
+      "timestamp": 1769370866786,
+      "text": "y. We",
+      "screenshot": "img-049.jpg",
+      "recordedAt": 1769370866822
+    },
+    {
+      "id": "a413",
+      "type": "mouse_click",
+      "timestamp": 1769370868256,
+      "button": "left",
+      "x": 0.6508177997076023,
+      "y": 0.7637618563685636,
+      "screenshot": "img-050.jpg",
+      "recordedAt": 1769370868282
+    },
+    {
+      "id": "a414",
+      "type": "mouse_click",
+      "timestamp": 1769370870068,
+      "button": "left",
+      "x": 0.5722062317251462,
+      "y": 0.7614611562782294,
+      "screenshot": "img-051.jpg",
+      "recordedAt": 1769370870102
+    },
+    {
+      "id": "a415",
+      "type": "typing",
+      "timestamp": 1769370874627,
+      "text": "were basically driving around with ",
+      "screenshot": "img-052.jpg",
+      "recordedAt": 1769370874649
+    },
+    {
+      "id": "a450",
+      "type": "special_key",
+      "timestamp": 1769370875649,
+      "key": "RIGHT",
+      "screenshot": "img-053.jpg",
+      "repeatCount": 4,
+      "recordedAt": 1769370875678
+    },
+    {
+      "id": "a454",
+      "type": "typing",
+      "timestamp": 1769370876108,
+      "text": "were basically driving around with",
+      "screenshot": "img-054.jpg",
+      "recordedAt": 1769370876136
+    },
+    {
+      "id": "a455",
+      "type": "mouse_click",
+      "timestamp": 1769370877474,
+      "button": "left",
+      "x": 0.7553453947368421,
+      "y": 0.7490896002710027,
+      "screenshot": "img-055.jpg",
+      "recordedAt": 1769370877505
+    },
+    {
+      "id": "a456",
+      "type": "typing",
+      "timestamp": 1769370878821,
+      "text": "a",
+      "screenshot": "img-056.jpg",
+      "recordedAt": 1769370878851
+    },
+    {
+      "id": "a463",
+      "type": "scroll",
+      "timestamp": 1769370881052,
+      "x": 0.9102544773391813,
+      "y": 0.6923872233514001,
+      "screenshot": "img-057.jpg",
+      "repeatCount": 16,
+      "recordedAt": 1769370881064
+    },
+    {
+      "id": "a479",
+      "type": "mouse_click",
+      "timestamp": 1769370882044,
+      "button": "left",
+      "x": 0.4283008954678363,
+      "y": 0.6696978037488708,
+      "screenshot": "img-058.jpg",
+      "recordedAt": 1769370882068
+    },
+    {
+      "id": "a480",
+      "type": "typing",
+      "timestamp": 1769370884593,
+      "text": "Yes. I",
+      "screenshot": "img-059.jpg",
+      "recordedAt": 1769370884621
+    },
+    {
+      "id": "a488",
+      "type": "special_key",
+      "timestamp": 1769370884651,
+      "key": "SPACE",
+      "screenshot": "img-060.jpg",
+      "recordedAt": 1769370884672
+    },
+    {
+      "id": "a489",
+      "type": "typing",
+      "timestamp": 1769370892281,
+      "text": "Yes. Ihave left previous job.",
+      "screenshot": "img-061.jpg",
+      "recordedAt": 1769370892306
+    },
+    {
+      "id": "a516",
+      "type": "mouse_click",
+      "timestamp": 1769370893088,
+      "button": "left",
+      "x": 0.3826457419590643,
+      "y": 0.7951953477868112,
+      "screenshot": "img-062.jpg",
+      "recordedAt": 1769370893110
+    },
+    {
+      "id": "a517",
+      "type": "typing",
+      "timestamp": 1769370922840,
+      "text": "Joined You.com as early employee. Cold emailed CEO",
+      "screenshot": "img-063.jpg",
+      "recordedAt": 1769370922860
+    },
+    {
+      "id": "a575",
+      "type": "special_key",
+      "timestamp": 1769370922937,
+      "key": "SPACE",
+      "screenshot": "img-064.jpg",
+      "recordedAt": 1769370922960
+    },
+    {
+      "id": "a576",
+      "type": "typing",
+      "timestamp": 1769370926201,
+      "text": "Joined You.com as early employee. Cold emailed CEORichard Socher ",
+      "screenshot": "img-065.jpg",
+      "recordedAt": 1769370926221
+    },
+    {
+      "id": "a593",
+      "type": "mouse_click",
+      "timestamp": 1769370928353,
+      "button": "left",
+      "x": 0.2988943713450292,
+      "y": 0.789941141598916,
+      "screenshot": "img-066.jpg",
+      "recordedAt": 1769370928383
+    },
+    {
+      "id": "a594",
+      "type": "mouse_click",
+      "timestamp": 1769370928897,
+      "button": "left",
+      "x": 0.29967562134502923,
+      "y": 0.7761898712737128,
+      "screenshot": "img-067.jpg",
+      "recordedAt": 1769370928927
+    },
+    {
+      "id": "a595",
+      "type": "special_key",
+      "timestamp": 1769370929374,
+      "key": "Space",
+      "screenshot": "img-068.jpg",
+      "recordedAt": 1769370929392
+    },
+    {
+      "id": "a596",
+      "type": "typing",
+      "timestamp": 1769370942714,
+      "text": "and launched our first Agent product that can ",
+      "screenshot": "img-069.jpg",
+      "recordedAt": 1769370942730
+    },
+    {
+      "id": "a654",
+      "type": "mouse_click",
+      "timestamp": 1769370944307,
+      "button": "left",
+      "x": 0.38524077119883043,
+      "y": 0.7778024785456188,
+      "screenshot": "img-070.jpg",
+      "recordedAt": 1769370944344
+    },
+    {
+      "id": "a655",
+      "type": "special_key",
+      "timestamp": 1769370944600,
+      "key": "Delete",
+      "screenshot": "img-071.jpg",
+      "recordedAt": 1769370944628
+    },
+    {
+      "id": "a656",
+      "type": "typing",
+      "timestamp": 1769370944699,
+      "text": "a",
+      "screenshot": "img-072.jpg",
+      "recordedAt": 1769370944718
+    },
+    {
+      "id": "a657",
+      "type": "mouse_click",
+      "timestamp": 1769370946132,
+      "button": "left",
+      "x": 0.4620499817251462,
+      "y": 0.7866488821138211,
+      "screenshot": "img-073.jpg",
+      "recordedAt": 1769370946163
+    },
+    {
+      "id": "a658",
+      "type": "typing",
+      "timestamp": 1769370951448,
+      "text": "run python code and ,ake plots for",
+      "screenshot": "img-074.jpg",
+      "recordedAt": 1769370951466
+    },
+    {
+      "id": "a692",
+      "type": "mouse_click",
+      "timestamp": 1769370953255,
+      "button": "left",
+      "x": 0.538671875,
+      "y": 0.7763733626919602,
+      "screenshot": "img-075.jpg",
+      "recordedAt": 1769370953287
+    },
+    {
+      "id": "a693",
+      "type": "special_key",
+      "timestamp": 1769370953626,
+      "key": "Delete",
+      "screenshot": "img-076.jpg",
+      "recordedAt": 1769370953657
+    },
+    {
+      "id": "a694",
+      "type": "typing",
+      "timestamp": 1769370953810,
+      "text": "m",
+      "screenshot": "img-077.jpg",
+      "recordedAt": 1769370953840
+    },
+    {
+      "id": "a695",
+      "type": "mouse_click",
+      "timestamp": 1769370954953,
+      "button": "left",
+      "x": 0.5870956688596491,
+      "y": 0.7897505928184282,
+      "screenshot": "img-078.jpg",
+      "recordedAt": 1769370954983
+    },
+    {
+      "id": "a696",
+      "type": "mouse_click",
+      "timestamp": 1769370956250,
+      "button": "left",
+      "x": 0.5850922880116959,
+      "y": 0.7857561257904245,
+      "screenshot": "img-079.jpg",
+      "recordedAt": 1769370956283
+    },
+    {
+      "id": "a697",
+      "type": "special_key",
+      "timestamp": 1769370956425,
+      "key": "Space",
+      "screenshot": "img-080.jpg",
+      "recordedAt": 1769370956441
+    },
+    {
+      "id": "a698",
+      "type": "typing",
+      "timestamp": 1769370961368,
+      "text": "data analytics",
+      "screenshot": "img-081.jpg",
+      "recordedAt": 1769370961396
+    },
+    {
+      "id": "a714",
+      "type": "mouse_click",
+      "timestamp": 1769370962744,
+      "button": "left",
+      "x": 0.7780587536549708,
+      "y": 0.7849480578139115,
+      "screenshot": "img-082.jpg",
+      "recordedAt": 1769370962773
+    },
+    {
+      "id": "a715",
+      "type": "typing",
+      "timestamp": 1769370993341,
+      "text": "and showed him my project from previous hackathon that basically is autogpt. ",
+      "screenshot": "img-083.jpg",
+      "recordedAt": 1769370993362
+    },
+    {
+      "id": "a840",
+      "type": "special_key",
+      "timestamp": 1769370994462,
+      "key": "ArrowLeft",
+      "screenshot": "img-084.jpg",
+      "recordedAt": 1769370994493
+    },
+    {
+      "id": "a841",
+      "type": "special_key",
+      "timestamp": 1769370995375,
+      "key": "ArrowLeft",
+      "screenshot": "img-085.jpg",
+      "repeatCount": 6,
+      "recordedAt": 1769370995396
+    },
+    {
+      "id": "a847",
+      "type": "special_key",
+      "timestamp": 1769370995785,
+      "key": "ArrowLeft",
+      "screenshot": "img-086.jpg",
+      "recordedAt": 1769370995816
+    },
+    {
+      "id": "a848",
+      "type": "special_key",
+      "timestamp": 1769370996062,
+      "key": "Delete",
+      "screenshot": "img-087.jpg",
+      "recordedAt": 1769370996092
+    },
+    {
+      "id": "a849",
+      "type": "typing",
+      "timestamp": 1769370996309,
+      "text": "A",
+      "screenshot": "img-088.jpg",
+      "recordedAt": 1769370996334
+    },
+    {
+      "id": "a850",
+      "type": "special_key",
+      "timestamp": 1769370997123,
+      "key": "ArrowRight",
+      "screenshot": "img-089.jpg",
+      "repeatCount": 5,
+      "recordedAt": 1769370997154
+    },
+    {
+      "id": "a855",
+      "type": "special_key",
+      "timestamp": 1769370997631,
+      "key": "ArrowRight",
+      "screenshot": "img-090.jpg",
+      "recordedAt": 1769370997661
+    },
+    {
+      "id": "a856",
+      "type": "special_key",
+      "timestamp": 1769370998157,
+      "key": "Delete",
+      "screenshot": "img-091.jpg",
+      "repeatCount": 3,
+      "recordedAt": 1769370998186
+    },
+    {
+      "id": "a859",
+      "type": "typing",
+      "timestamp": 1769370998913,
+      "text": "GPT",
+      "screenshot": "img-092.jpg",
+      "recordedAt": 1769370998937
+    },
+    {
+      "id": "a862",
+      "type": "special_key",
+      "timestamp": 1769370999297,
+      "key": "ArrowRight",
+      "screenshot": "img-093.jpg",
+      "recordedAt": 1769370999329
+    },
+    {
+      "id": "a863",
+      "type": "special_key",
+      "timestamp": 1769371004481,
+      "key": "Space",
+      "screenshot": "img-094.jpg",
+      "recordedAt": 1769371004518
+    },
+    {
+      "id": "a864",
+      "type": "typing",
+      "timestamp": 1769371009142,
+      "text": "It fitted very well",
+      "screenshot": "img-095.jpg",
+      "recordedAt": 1769371009171
+    },
+    {
+      "id": "a887",
+      "type": "mouse_drag",
+      "timestamp": 1769371012627,
+      "button": "left",
+      "startX": 0.41238578216374266,
+      "startY": 0.8021292061878952,
+      "endX": 0.49192936769005846,
+      "endY": 0.8021292061878952,
+      "screenshot": "img-096.jpg",
+      "recordedAt": 1769371012657
+    },
+    {
+      "id": "a888",
+      "type": "special_key",
+      "timestamp": 1769371012958,
+      "key": "Delete",
+      "screenshot": "img-097.jpg",
+      "recordedAt": 1769371012988
+    },
+    {
+      "id": "a889",
+      "type": "special_key",
+      "timestamp": 1769371013844,
+      "key": "Return",
+      "screenshot": "img-098.jpg",
+      "recordedAt": 1769371013876
+    },
+    {
+      "id": "a890",
+      "type": "special_key",
+      "timestamp": 1769371014401,
+      "key": "Return",
+      "screenshot": "img-099.jpg",
+      "recordedAt": 1769371014432
+    },
+    {
+      "id": "a891",
+      "type": "typing",
+      "timestamp": 1769371031709,
+      "text": "Built Qwen from scratch and got 300+ stars. ",
+      "screenshot": "img-100.jpg",
+      "recordedAt": 1769371031729
+    },
+    {
+      "id": "a947",
+      "type": "mouse_click",
+      "timestamp": 1769371034372,
+      "button": "left",
+      "x": 0.2628198099415205,
+      "y": 0.8339437951671184,
+      "screenshot": "img-101.jpg",
+      "recordedAt": 1769371034399
+    },
+    {
+      "id": "a948",
+      "type": "typing",
+      "timestamp": 1769371037939,
+      "text": ", posted it on internet",
+      "screenshot": "img-102.jpg",
+      "recordedAt": 1769371037962
+    },
+    {
+      "id": "a973",
+      "type": "mouse_click",
+      "timestamp": 1769371039591,
+      "button": "left",
+      "x": 0.4404422514619883,
+      "y": 0.828199102303523,
+      "screenshot": "img-103.jpg",
+      "recordedAt": 1769371039623
+    },
+    {
+      "id": "a974",
+      "type": "typing",
+      "timestamp": 1769371048837,
+      "text": "Was very proud since I",
+      "screenshot": "img-104.jpg",
+      "recordedAt": 1769371048867
+    },
+    {
+      "id": "a1008",
+      "type": "special_key",
+      "timestamp": 1769371048894,
+      "key": "SPACE",
+      "screenshot": "img-105.jpg",
+      "recordedAt": 1769371048914
+    },
+    {
+      "id": "a1009",
+      "type": "typing",
+      "timestamp": 1769371083330,
+      "text": "Was very proud since Ihad never imagined me publishing anything and was basically always trying to make basic living (working in a job, etc).",
+      "screenshot": "img-106.jpg",
+      "recordedAt": 1769371083366
+    },
+    {
+      "id": "a1164",
+      "type": "scroll",
+      "timestamp": 1769371086807,
+      "x": 0.12425758406432749,
+      "y": 0.8059013663053297,
+      "screenshot": "img-107.jpg",
+      "repeatCount": 17,
+      "recordedAt": 1769371086837
+    },
+    {
+      "id": "a1181",
+      "type": "mouse_click",
+      "timestamp": 1769371088913,
+      "button": "left",
+      "x": 0.21302997076023392,
+      "y": 0.7710521115627823,
+      "screenshot": "img-108.jpg",
+      "recordedAt": 1769371088939
+    },
+    {
+      "id": "a1182",
+      "type": "typing",
+      "timestamp": 1769371098526,
+      "text": "I have quite a specific idea. I'm building desktop",
+      "screenshot": "img-109.jpg",
+      "recordedAt": 1769371098543
+    },
+    {
+      "id": "a1238",
+      "type": "mouse_click",
+      "timestamp": 1769371100340,
+      "button": "left",
+      "x": 0.30820084064327485,
+      "y": 0.57934592366757,
+      "screenshot": "img-110.jpg",
+      "recordedAt": 1769371100377
+    },
+    {
+      "id": "a1239",
+      "type": "special_key",
+      "timestamp": 1769371100863,
+      "key": "Return",
+      "screenshot": "img-111.jpg",
+      "repeatCount": 2,
+      "recordedAt": 1769371100896
+    },
+    {
+      "id": "a1241",
+      "type": "typing",
+      "timestamp": 1769371108356,
+      "text": "Turned down $500k cash +",
+      "screenshot": "img-112.jpg",
+      "recordedAt": 1769371108379
+    },
+    {
+      "id": "a1269",
+      "type": "special_key",
+      "timestamp": 1769371108434,
+      "key": "SPACE",
+      "screenshot": "img-113.jpg",
+      "recordedAt": 1769371108452
+    },
+    {
+      "id": "a1270",
+      "type": "typing",
+      "timestamp": 1769371137625,
+      "text": "Turned down $500k cash +$450k acquire-hire offer from a pre-seed AI research startup since I",
+      "screenshot": "img-114.jpg",
+      "recordedAt": 1769371137653
+    },
+    {
+      "id": "a1372",
+      "type": "special_key",
+      "timestamp": 1769371137720,
+      "key": "SPACE",
+      "screenshot": "img-115.jpg",
+      "recordedAt": 1769371137745
+    },
+    {
+      "id": "a1373",
+      "type": "typing",
+      "timestamp": 1769371142780,
+      "text": "Turned down $500k cash +$450k acquire-hire offer from a pre-seed AI research startup since Idecided I",
+      "screenshot": "img-116.jpg",
+      "recordedAt": 1769371142809
+    },
+    {
+      "id": "a1396",
+      "type": "special_key",
+      "timestamp": 1769371142852,
+      "key": "SPACE",
+      "screenshot": "img-117.jpg",
+      "recordedAt": 1769371142874
+    },
+    {
+      "id": "a1397",
+      "type": "typing",
+      "timestamp": 1769371147281,
+      "text": "Turned down $500k cash +$450k acquire-hire offer from a pre-seed AI research startup since Idecided Iwanna launch my own thing.",
+      "screenshot": "img-118.jpg",
+      "recordedAt": 1769371147316
+    },
+    {
+      "id": "a1425",
+      "type": "mouse_click",
+      "timestamp": 1769371169579,
+      "button": "left",
+      "x": 0.6593384502923977,
+      "y": 0.023123447380307135,
+      "screenshot": "img-119.jpg",
+      "recordedAt": 1769371169599
+    },
+    {
+      "id": "a1426",
+      "type": "mouse_click",
+      "timestamp": 1769371170426,
+      "button": "left",
+      "x": 0.6595691703216374,
+      "y": 0.050629516711833786,
+      "screenshot": "img-120.jpg",
+      "recordedAt": 1769371170457
+    }
+  ]
+}
