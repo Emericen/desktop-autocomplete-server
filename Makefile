@@ -7,8 +7,10 @@ export MAX_MODEL_LEN ?= 100000
 export MAX_IMAGE_COUNT ?= 100
 export TOOL_CALL_PARSER ?= hermes
 export HF_CACHE   ?= $(HOME)/.cache/huggingface
-export VLLM_PORT  ?= 8000  # Internal, vLLM ↔ API communication
-export API_PORT   ?= 443   # External, exposed to host (privileged, requires docker group)
+# Internal: vLLM ↔ API communication
+export VLLM_PORT  ?= 8000
+# External: exposed to host
+export API_PORT   ?= 443
 export MAX_PREDICT_TOKENS ?= 20
 export MAX_COMPACT_TOKENS ?= 200
 export TEMPERATURE ?= 0.0
