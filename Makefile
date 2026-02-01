@@ -46,6 +46,9 @@ shell: ## Shell into vLLM container
 build: ## Rebuild API container
 	docker compose build api
 
+restart-api: ## Restart only the API container (keeps vLLM running)
+	docker compose restart api
+
 warmup: ## Preload vision processor
 	@echo "Sending warmup request..."
 	@curl -s -X POST http://localhost:$(API_PORT)/health -o /dev/null -w "API ready (%{http_code})\n"

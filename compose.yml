@@ -42,6 +42,8 @@ services:
       - target: 8080
         published: ${API_PORT:-8080}
         protocol: tcp
+    volumes:
+      - ./app.py:/app/app.py:ro
     environment:
       - VLLM_BASE_URL=http://vllm:${VLLM_PORT:-8000}/v1
       - MODEL=${MODEL:-Qwen/Qwen3-VL-32B-Instruct-FP8}
@@ -49,6 +51,7 @@ services:
       - MAX_COMPACT_TOKENS=${MAX_COMPACT_TOKENS:-200}
       - TEMPERATURE=${TEMPERATURE:-0.0}
       - MAX_MODEL_LEN=${MAX_MODEL_LEN:-100000}
+    command: uvicorn app:app --host 0.0.0.0 --port 8080 --reload
     depends_on:
       vllm:
         condition: service_healthy
