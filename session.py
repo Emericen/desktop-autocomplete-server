@@ -1,216 +1,103 @@
 import os
-
+import json
 import openai
-from pydantic import BaseModel, Field
+from typing import Any
 
 VLLM_BASE_URL = os.getenv("VLLM_BASE_URL", "http://localhost:8000/v1")
 MODEL = os.getenv("MODEL", "Qwen/Qwen3-VL-32B-Instruct-FP8")
 API_KEY = os.getenv("API_KEY", "EMPTY")
-MAX_PREDICT_TOKENS = int(os.getenv("MAX_PREDICT_TOKENS", "20"))
-MAX_COMPACT_TOKENS = int(os.getenv("MAX_COMPACT_TOKENS", "300"))
+MAX_PREDICT_TOKENS = int(os.getenv("MAX_PREDICT_TOKENS", "100"))
 TEMPERATURE = float(os.getenv("TEMPERATURE", "0.0"))
-MAX_MODEL_LEN = int(os.getenv("MAX_MODEL_LEN", "20000"))
+MAX_ACTION_BLOCKS = int(
+    os.getenv("MAX_ACTION_BLOCKS", "15")
+)  # ~5 actions × 2-3 blocks each
 
+SYSTEM_PROMPT = """You are a desktop autocomplete assistant.
 
-class Action(BaseModel):
-    id: str
-    timestamp: int
+## When you're called
+The user has selected an empty text field and pressed Cmd+E to request a suggestion.
 
-    def to_llm_content_blocks(self) -> list[dict]:
-        raise NotImplementedError("Subclasses must implement this method")
+## Your task
+Generate a suggestion for what to enter in the text field based on:
+1. The user's context (documents, instructions, personal info) — provided as text and images
+2. Recent actions — what the user has been doing on screen
 
+## Context format
+Context contains interlaced text and images. Images are labeled like [c1], [c2], etc.
+Example:
+- Text: "My driver's license:"
+- [c1] followed by an image of the license
 
-class TypingAction(Action):
-    text: str
-    screenshot: str
+## Response format
+Return raw JSON only (no markdown, no ```json fences):
+{"suggestion": "text to fill", "source": "c1", "bbox": [x1, y1, x2, y2]}
 
-    def to_llm_content_blocks(self) -> list[dict]:
-        return [
-            {"type": "text", "text": f'Typed: "{self.text}"'},
-            {"type": "image_url", "image_url": {"url": self.screenshot}},
-        ]
+- `suggestion`: The text to enter in the field. Keep it concise and relevant.
+- `source`: If the info comes from an image, return its label (e.g., "c1"). Otherwise null.
+- `bbox`: If source is an image, draw a bounding box around the relevant info. Coordinates are normalized 0-1000 (top-left origin). Format: [x1, y1, x2, y2]. Otherwise null.
 
+## When to skip
+If there's no clear evidence in the context for what to fill, return:
+{"suggestion": "<skip>", "source": null, "bbox": null}
 
-class MouseClickAction(Action):
-    button: str
-    x: float
-    y: float
-    screenshot: str
-
-    def to_llm_content_blocks(self) -> list[dict]:
-        return [
-            {"type": "text", "text": f"{self.button.capitalize()} click"},
-            {"type": "image_url", "image_url": {"url": self.screenshot}},
-        ]
-
-
-class MouseDragAction(Action):
-    button: str
-    start_x: float = Field(alias="startX")
-    start_y: float = Field(alias="startY")
-    end_x: float = Field(alias="endX")
-    end_y: float = Field(alias="endY")
-    screenshot: str
-
-    def to_llm_content_blocks(self) -> list[dict]:
-        return [
-            {"type": "text", "text": f"Dragged with {self.button} mouse button"},
-            {"type": "image_url", "image_url": {"url": self.screenshot}},
-        ]
-
-
-class ScrollAction(Action):
-    x: float
-    y: float
-    screenshot: str
-
-    def to_llm_content_blocks(self) -> list[dict]:
-        return [
-            {"type": "text", "text": "Scrolled"},
-            {"type": "image_url", "image_url": {"url": self.screenshot}},
-        ]
-
-
-class HotkeyAction(Action):
-    modifiers: list[str]
-    key: str
-
-    def to_llm_content_blocks(self) -> list[dict]:
-        combo = " + ".join(m.capitalize() for m in self.modifiers) + f" + {self.key}"
-        return [{"type": "text", "text": f"Hit `{combo}`"}]
-
-
-class SpecialKeyAction(Action):
-    key: str
-
-    def to_llm_content_blocks(self) -> list[dict]:
-        return [{"type": "text", "text": f"Hit `{self.key}`"}]
-
-
-class AutocompleteAction(Action):
-    text: str
-
-    def to_llm_content_blocks(self) -> list[dict]:
-        return [{"type": "text", "text": f'Accepted: "{self.text}"'}]
-
-
-def parse_action(data: dict) -> Action:
-    action_type = data.get("type")
-    if action_type == "typing":
-        return TypingAction(**data)
-    elif action_type == "mouse_click":
-        return MouseClickAction(**data)
-    elif action_type == "mouse_drag":
-        return MouseDragAction(**data)
-    elif action_type == "scroll":
-        return ScrollAction(**data)
-    elif action_type == "hotkey":
-        return HotkeyAction(**data)
-    elif action_type == "special_key":
-        return SpecialKeyAction(**data)
-    elif action_type == "autocomplete":
-        return AutocompleteAction(**data)
-    else:
-        raise ValueError(f"Unknown action type: {action_type}")
-
-
-SYSTEM_PROMPT = """
-You are a desktop autocomplete assistant that watches over the user's computer and predicts what they are about to enter next. You will learn about the user over time, and your suggestion will be surfaced to the user as on-screen overlay bubble in which they can accept or deny. Should they accept, we will then type the text on their computer automatically. Your goal is to help the user spend less time typing and editing text.
-
-You will receive timestamped events showing what the user did (typed text, mouse clicks, key presses, scrolling) paired with screenshots of what was on screen at that moment for each non-typing event.
-
-We will also highlight user's cursor on the screenshots to help you identify the user's intent. 
-
-A screenshot for a mouse click event will have a yellow ring around the cursor, indicating the click's location. For your info, the ring is generated by the following code:
-
-```javascript
-  drawClickRing(x, y, radius = 55, ringWidth = 10, alpha = 0.85) {
-    const ctx = this.canvasContext
-
-    // Draw outer glow (larger, blurred ring)
-    ctx.beginPath()
-    ctx.arc(x, y, radius + 5, 0, 2 * Math.PI)
-    ctx.strokeStyle = `rgba(255, 235, 0, 0.3)`
-    ctx.lineWidth = ringWidth + 15
-    ctx.stroke()
-
-    // Draw main ring
-    ctx.beginPath()
-    ctx.arc(x, y, radius, 0, 2 * Math.PI)
-    ctx.strokeStyle = `rgba(255, 235, 0, ${alpha})`
-    ctx.lineWidth = ringWidth
-    ctx.stroke()
-  }
-```
-
-Pay close attention to the user's cursor and the location of the click. Specifically, you should predict user's text when they:
-
-#1. Clicked on an editable text field
-#2. Have selected an editable text field and their latest event indicate they typed some text.
-
-In case #1, you should predict the full extent of the text that the user is about to type. In case #2, you should predict the rest of the text that the user is about to type. (e.g. if their email is "john.doe@example.com", and they have typed "joh", you should predict "n.doe@example.com".)
-
-Otherwise, you should skip the prediction and wait for the next event.
-
-Respond with only your prediction text, or <skip> if you decide to skip the prediction.
-
-""".strip()
-COMPACT_PROMPT = """Summarize what happened here and everything you have seen so far into one paragraph of plain english text. Keep it short and concise."""
+Only suggest information you can find in the provided context. Do not hallucinate."""
 
 
 class Session:
-    def __init__(self, session_id: str):
+    """Stateful session for streaming context + actions to LLM.
+
+    Everything is OpenAI content blocks — no conversion needed.
+    """
+
+    def __init__(
+        self,
+        session_id: str,
+        base_url: str = VLLM_BASE_URL,
+        model: str = MODEL,
+        api_key: str = API_KEY,
+    ):
         self.session_id = session_id
-        self.client = openai.OpenAI(api_key=API_KEY, base_url=VLLM_BASE_URL)
-        self.actions: list[Action] = []
-        self.content_blocks: list[dict] = []
-        self.context_length = 0
+        self.model = model
+        self.client = openai.OpenAI(api_key=api_key, base_url=base_url)
 
-    def predict(self, action: dict) -> str:
-        action = parse_action(action)
-        self.content_blocks.extend(action.to_llm_content_blocks())
-        self.actions.append(action)
+        self.context: list[dict] = []  # OpenAI content blocks (static)
+        self.actions: list[dict] = []  # OpenAI content blocks (dynamic)
 
+    def set_context(self, blocks: list[dict]) -> None:
+        self.context = blocks
+
+    def add_action(self, blocks: list[dict]) -> None:
+        self.actions.extend(blocks)
+        while len(self.actions) > MAX_ACTION_BLOCKS:
+            self.actions.pop(0)
+        self._request_model(max_tokens=1)  # warm cache
+
+    def predict(self) -> dict[str, Any]:
+        response = self._request_model()
         try:
-            response = self.client.chat.completions.create(
-                model=MODEL,
-                messages=[
-                    {"role": "system", "content": SYSTEM_PROMPT},
-                    {"role": "user", "content": self.content_blocks},
-                ],
-                max_tokens=MAX_PREDICT_TOKENS,
-                temperature=TEMPERATURE,
-            )
-        except openai.BadRequestError as e:
-            if "context length" in str(e).lower() or "too large" in str(e).lower():
-                response = self.client.chat.completions.create(
-                    model=MODEL,
-                    messages=[
-                        {"role": "system", "content": SYSTEM_PROMPT},
-                        {"role": "user", "content": self.content_blocks},
-                        {"role": "user", "content": COMPACT_PROMPT},
-                    ],
-                    max_tokens=MAX_COMPACT_TOKENS,
-                    temperature=TEMPERATURE,
-                )
-                summary = response.choices[0].message.content
-                self.content_blocks = [{"type": "text", "text": summary}]
-                response = self.client.chat.completions.create(
-                    model=MODEL,
-                    messages=[
-                        {"role": "system", "content": SYSTEM_PROMPT},
-                        {"role": "user", "content": self.content_blocks},
-                    ],
-                    max_tokens=MAX_PREDICT_TOKENS,
-                    temperature=TEMPERATURE,
-                )
-            else:
-                raise
+            response_json = json.loads(response.choices[0].message.content)
+            return {
+                "suggestion": response_json.get("suggestion", ""),
+                "source": response_json.get("source", None),
+                "bbox": response_json.get("bbox", None),
+            }
+        except json.JSONDecodeError:
+            print(f"Error: {response.choices[0].message.content}")
+            return {"suggestion": "", "source": None, "bbox": None}
 
-        self.context_length = response.usage.prompt_tokens
-        return response.choices[0].message.content
+    def _request_model(
+        self, max_tokens: int = MAX_PREDICT_TOKENS
+    ) -> openai.ChatCompletion:
+        return self.client.chat.completions.create(
+            model=self.model,
+            messages=[
+                {"role": "system", "content": SYSTEM_PROMPT},
+                {"role": "user", "content": self.context + self.actions},
+            ],
+            max_tokens=max_tokens,
+            temperature=TEMPERATURE,
+        )
 
-    def clear(self):
+    def clear(self) -> None:
+        self.context = []
         self.actions = []
-        self.content_blocks = []
-        self.context_length = 0
