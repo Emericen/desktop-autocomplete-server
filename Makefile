@@ -1,5 +1,6 @@
 # Config (override via env or command line)
-export MODEL      ?= Qwen/Qwen3-VL-32B-Instruct-FP8
+# export MODEL      ?= Qwen/Qwen3-VL-32B-Instruct-FP8
+export MODEL      ?= Qwen/Qwen3-VL-8B-Instruct
 export DTYPE      ?= auto
 export TENSOR_PARALLEL ?= 1
 export GPUS       ?= all
@@ -11,7 +12,7 @@ export HF_CACHE   ?= $(HOME)/.cache/huggingface
 export VLLM_PORT  ?= 8000
 # External: exposed to host
 export API_PORT   ?= 443
-export MAX_PREDICT_TOKENS ?= 20
+export MAX_PREDICT_TOKENS ?= 100
 export MAX_COMPACT_TOKENS ?= 200
 export TEMPERATURE ?= 0.0
 
