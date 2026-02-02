@@ -1,6 +1,6 @@
 services:
   vllm:
-    image: vllm/vllm-openai:latest
+    image: vllm/vllm-openai:v0.11.0
     ipc: host
     shm_size: 16g
     restart: unless-stopped
@@ -25,7 +25,6 @@ services:
       - --enable-auto-tool-choice
       - --tool-call-parser=${TOOL_CALL_PARSER:-hermes}
       - --limit-mm-per-prompt={"image":${MAX_IMAGE_COUNT:-100}}
-      - --mm-processor-kwargs={"min_pixels":784,"max_pixels":2073600}
       - --max-model-len=${MAX_MODEL_LEN:-100000}
       - --gpu-memory-utilization=${GPU_MEMORY_UTILIZATION:-0.95}
       - --max-num-seqs=${MAX_NUM_SEQS:-128}
