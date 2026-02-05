@@ -17,7 +17,7 @@ API_KEY = os.getenv("API_KEY", "EMPTY")
 MAX_PREDICT_TOKENS = int(os.getenv("MAX_PREDICT_TOKENS", "100"))
 MAX_COMPACT_TOKENS = int(os.getenv("MAX_COMPACT_TOKENS", "300"))
 TEMPERATURE = float(os.getenv("TEMPERATURE", "0.0"))
-# VLLM_HEALTH_URL = VLLM_BASE_URL.rsplit("/v1", 1)[0] + "/health"
+VLLM_HEALTH_URL = VLLM_BASE_URL.rsplit("/v1", 1)[0] + "/health"
 
 SYSTEM_PROMPT = """You are a desktop autocomplete assistant.
 
@@ -106,12 +106,12 @@ def get_session(sid: str) -> dict:
 def parse_reasoning_response(raw: str) -> dict:
     """Parse 'Reasoning: ... Answer: {...}' format into structured dict."""
     result = {"reasoning": None, "suggestion": None, "source": None, "bbox": None}
-    
+
     # Extract reasoning
     reasoning_match = re.search(r"Reasoning:\s*(.+?)(?=Answer:|$)", raw, re.DOTALL)
     if reasoning_match:
         result["reasoning"] = reasoning_match.group(1).strip()
-    
+
     # Extract JSON from Answer: line
     answer_match = re.search(r"Answer:\s*(\{.+\})", raw, re.DOTALL)
     if answer_match:
@@ -133,7 +133,7 @@ def parse_reasoning_response(raw: str) -> dict:
                 result["bbox"] = parsed.get("bbox")
             except json.JSONDecodeError:
                 pass
-    
+
     return result
 
 
@@ -169,15 +169,15 @@ async def lifespan(app: FastAPI):
 app = FastAPI(lifespan=lifespan)
 
 
-# @app.get("/health")
-# async def health():
-#     try:
-#         async with httpx.AsyncClient(timeout=5.0) as http:
-#             r = await http.get(VLLM_HEALTH_URL)
-#             vllm_ok = r.status_code == 200
-#     except Exception:
-#         vllm_ok = False
-#     return {"ok": vllm_ok, "api": True, "vllm": vllm_ok}
+@app.get("/health")
+async def health():
+    try:
+        async with httpx.AsyncClient(timeout=5.0) as http:
+            r = await http.get(VLLM_HEALTH_URL)
+            vllm_ok = r.status_code == 200
+    except Exception:
+        vllm_ok = False
+    return {"ok": vllm_ok, "api": True, "vllm": vllm_ok}
 
 
 @app.post("/test")
@@ -222,10 +222,10 @@ async def predict(req: SessionRequest):
     raw, prompt_tokens = call_model(
         req.session_id, content, max_tokens=300  # More tokens for reasoning
     )
-    
+
     # Parse reasoning response
     parsed = parse_reasoning_response(raw)
-    
+
     return PredictResponse(
         session_id=req.session_id,
         prompt_tokens=prompt_tokens,
