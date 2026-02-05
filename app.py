@@ -1,4 +1,6 @@
+import json
 import os
+import re
 import uuid
 from contextlib import asynccontextmanager
 from typing import Any
@@ -15,42 +17,32 @@ API_KEY = os.getenv("API_KEY", "EMPTY")
 MAX_PREDICT_TOKENS = int(os.getenv("MAX_PREDICT_TOKENS", "100"))
 MAX_COMPACT_TOKENS = int(os.getenv("MAX_COMPACT_TOKENS", "300"))
 TEMPERATURE = float(os.getenv("TEMPERATURE", "0.0"))
-VLLM_HEALTH_URL = VLLM_BASE_URL.rsplit("/v1", 1)[0] + "/health"
+# VLLM_HEALTH_URL = VLLM_BASE_URL.rsplit("/v1", 1)[0] + "/health"
 
 SYSTEM_PROMPT = """You are a desktop autocomplete assistant.
 
-## When you're called
-The user has selected an empty text field and pressed Cmd+E to request a suggestion.
-
-## Your task
-Generate a suggestion for what to enter in the text field based on:
-1. The user's clipboard (documents, instructions, personal info) — provided as text and images
-2. Recent actions — what the user has been doing on screen
+The user clicked on a text field (red crosshairs + coordinates show the click location). 
+Suggest what to enter based on their clipboard.
 
 ## Clipboard format
-Clipboard contains interlaced text and images. Images are labeled like [c1], [c2], etc.
-Example:
-- Text: "My driver's license:"
-- [c1] followed by an image of the license
+Labeled images [c1], [c2], etc. with text descriptions.
+
+## Screenshot format  
+Red dotted crosshairs mark where the user clicked. Axis labels show normalized 0-1000 coordinates.
 
 ## Response format
-Return raw JSON only (no markdown, no ```json fences):
-{"suggestion": "text to fill", "source": "c1", "bbox": [x1, y1, x2, y2]}
+Brief reasoning (1-2 sentences), then JSON:
 
-- `suggestion`: The text to enter in the field. Keep it concise and relevant.
-- `source`: If the info comes from an image, return its label (e.g., "c1"). Otherwise null.
-- `bbox`: If source is an image, draw a bounding box around the relevant info. Coordinates are normalized 0-1000 (top-left origin). Format: [x1, y1, x2, y2]. Otherwise null.
+Reasoning: [what field is at the crosshairs, what info it needs]
+Answer: {"suggestion": "text", "source": "c1", "bbox": [x1, y1, x2, y2]}
 
-## CRITICAL: When to skip (DO NOT HALLUCINATE)
-If the information the user needs is NOT directly visible in the clipboard or action history, you MUST return:
-{"suggestion": null, "source": null, "bbox": null}
+- suggestion: text to fill, or null if not in clipboard
+- source: clipboard image label (e.g. "c1") if from image, else null  
+- bbox: [x1,y1,x2,y2] normalized 0-1000 if source is image, else null
 
-Skip when:
-- The field asks for info not present in clipboard (e.g., phone number when only address is available)
-- You're unsure what the field is asking for
-- The info cannot be verified from the provided content
+If not found: {"suggestion": null, "source": null, "bbox": null}
 
-NEVER make up, guess, or infer information that isn't explicitly shown. It's better to return null than to suggest something incorrect. The user trusts you to only provide verified information."""
+NEVER guess."""
 
 COMPACT_PROMPT = """Summarize the user's recent actions into a brief paragraph. Extract key information relevant to understanding what the user is doing and what they might need to fill in next. Be concise."""
 
@@ -92,6 +84,10 @@ class PredictResponse(BaseModel):
     session_id: str
     prompt_tokens: int
     raw: str
+    reasoning: str | None = None
+    suggestion: str | None = None
+    source: str | None = None
+    bbox: list[int] | None = None
 
 
 class TestRequest(BaseModel):
@@ -105,6 +101,40 @@ def get_session(sid: str) -> dict:
     if sid not in sessions:
         sessions[sid] = {"clipboard": [], "actions": [], "tokens": 0}
     return sessions[sid]
+
+
+def parse_reasoning_response(raw: str) -> dict:
+    """Parse 'Reasoning: ... Answer: {...}' format into structured dict."""
+    result = {"reasoning": None, "suggestion": None, "source": None, "bbox": None}
+    
+    # Extract reasoning
+    reasoning_match = re.search(r"Reasoning:\s*(.+?)(?=Answer:|$)", raw, re.DOTALL)
+    if reasoning_match:
+        result["reasoning"] = reasoning_match.group(1).strip()
+    
+    # Extract JSON from Answer: line
+    answer_match = re.search(r"Answer:\s*(\{.+\})", raw, re.DOTALL)
+    if answer_match:
+        try:
+            parsed = json.loads(answer_match.group(1))
+            result["suggestion"] = parsed.get("suggestion")
+            result["source"] = parsed.get("source")
+            result["bbox"] = parsed.get("bbox")
+        except json.JSONDecodeError:
+            pass
+    else:
+        # Fallback: try to find any JSON in the response
+        json_match = re.search(r"\{[^{}]*\}", raw)
+        if json_match:
+            try:
+                parsed = json.loads(json_match.group(0))
+                result["suggestion"] = parsed.get("suggestion")
+                result["source"] = parsed.get("source")
+                result["bbox"] = parsed.get("bbox")
+            except json.JSONDecodeError:
+                pass
+    
+    return result
 
 
 def call_model(
@@ -139,15 +169,15 @@ async def lifespan(app: FastAPI):
 app = FastAPI(lifespan=lifespan)
 
 
-@app.get("/health")
-async def health():
-    try:
-        async with httpx.AsyncClient(timeout=5.0) as http:
-            r = await http.get(VLLM_HEALTH_URL)
-            vllm_ok = r.status_code == 200
-    except Exception:
-        vllm_ok = False
-    return {"ok": vllm_ok, "api": True, "vllm": vllm_ok}
+# @app.get("/health")
+# async def health():
+#     try:
+#         async with httpx.AsyncClient(timeout=5.0) as http:
+#             r = await http.get(VLLM_HEALTH_URL)
+#             vllm_ok = r.status_code == 200
+#     except Exception:
+#         vllm_ok = False
+#     return {"ok": vllm_ok, "api": True, "vllm": vllm_ok}
 
 
 @app.post("/test")
@@ -176,9 +206,9 @@ async def set_clipboard(req: ClipboardRequest):
 async def add_action(req: ActionRequest):
     """Add user actions. Returns token count so client knows when to compact."""
     session = get_session(req.session_id)
-    session["actions"].extend(
-        [{"type": "text", "text": "Recent Actions:"}] + req.blocks
-    )
+    if not session["actions"]:
+        session["actions"].append({"type": "text", "text": "Recent Actions:"})
+    session["actions"].extend(req.blocks)
     content = session["clipboard"] + session["actions"]
     _, prompt_tokens = call_model(req.session_id, content, max_tokens=1)
     return ActionResponse(session_id=req.session_id, prompt_tokens=prompt_tokens)
@@ -186,14 +216,24 @@ async def add_action(req: ActionRequest):
 
 @app.post("/predict", response_model=PredictResponse)
 async def predict(req: SessionRequest):
-    """Generate autocomplete suggestion."""
+    """Generate autocomplete suggestion with reasoning."""
     session = get_session(req.session_id)
     content = session["clipboard"] + session["actions"]
     raw, prompt_tokens = call_model(
-        req.session_id, content, max_tokens=MAX_PREDICT_TOKENS
+        req.session_id, content, max_tokens=300  # More tokens for reasoning
     )
+    
+    # Parse reasoning response
+    parsed = parse_reasoning_response(raw)
+    
     return PredictResponse(
-        session_id=req.session_id, prompt_tokens=prompt_tokens, raw=raw
+        session_id=req.session_id,
+        prompt_tokens=prompt_tokens,
+        raw=raw,
+        reasoning=parsed["reasoning"],
+        suggestion=parsed["suggestion"],
+        source=parsed["source"],
+        bbox=parsed["bbox"],
     )
 
 
