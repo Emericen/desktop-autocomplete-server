@@ -18,6 +18,7 @@ GPU_MEMORY_UTILIZATION = float(os.getenv("GPU_MEMORY_UTILIZATION", "0.95"))
 MAX_NUM_SEQS = int(os.getenv("MAX_NUM_SEQS", "128"))
 MAX_PREDICT_TOKENS = int(os.getenv("MAX_PREDICT_TOKENS", "100"))
 MAX_COMPACT_TOKENS = int(os.getenv("MAX_COMPACT_TOKENS", "300"))
+MAX_ACTIONS = int(os.getenv("MAX_ACTIONS", "0"))  # 0 = unlimited, N = sliding window of last N action pairs
 TEMPERATURE = float(os.getenv("TEMPERATURE", "0.0"))
 
 SYSTEM_PROMPT = """You are a desktop autocomplete assistant.
@@ -204,6 +205,16 @@ async def add_action(req: ActionRequest):
     if not session["actions"]:
         session["actions"].append({"type": "text", "text": "Recent Actions:"})
     session["actions"].extend(req.blocks)
+
+    # Sliding window: keep header + last MAX_ACTIONS pairs (each pair = text label + image)
+    if MAX_ACTIONS > 0:
+        header = session["actions"][:1]  # "Recent Actions:" text block
+        pairs = session["actions"][1:]   # action pairs after header
+        max_blocks = MAX_ACTIONS * 2
+        if len(pairs) > max_blocks:
+            pairs = pairs[-max_blocks:]
+        session["actions"] = header + pairs
+
     content = session["clipboard"] + session["actions"]
     _, prompt_tokens = call_model(req.session_id, content, max_tokens=1)
     return ActionResponse(session_id=req.session_id, prompt_tokens=prompt_tokens)

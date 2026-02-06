@@ -10,6 +10,7 @@ export HF_CACHE        ?= $(HOME)/.cache/huggingface
 export API_PORT        ?= 443
 export MAX_PREDICT_TOKENS ?= 100
 export MAX_COMPACT_TOKENS ?= 200
+export MAX_ACTIONS     ?= 0
 export TEMPERATURE     ?= 0.0
 
 IMAGE_NAME ?= desktop-autocomplete
@@ -37,7 +38,9 @@ run: ## Run the container
 		-e GPU_MEMORY_UTILIZATION=$(GPU_MEMORY_UTILIZATION) \
 		-e MAX_PREDICT_TOKENS=$(MAX_PREDICT_TOKENS) \
 		-e MAX_COMPACT_TOKENS=$(MAX_COMPACT_TOKENS) \
+		-e MAX_ACTIONS=$(MAX_ACTIONS) \
 		-e TEMPERATURE=$(TEMPERATURE) \
+		-v $(CURDIR)/app.py:/app/app.py:ro \
 		$(IMAGE_NAME)
 	@echo "✅ Container started. Run 'make logs' to watch."
 
