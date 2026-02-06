@@ -148,7 +148,7 @@ def call_model(
         {"role": "user", "content": content},
     ]
 
-    outputs = llm.chat([messages], sampling_params=sampling_params)
+    outputs = llm.chat([messages], sampling_params=sampling_params, use_tqdm=False)
     generated_text = outputs[0].outputs[0].text
     prompt_tokens = len(outputs[0].prompt_token_ids)
 
