@@ -12,4 +12,4 @@ EXPOSE ${API_PORT}
 
 # Override the vLLM entrypoint so we run our own FastAPI app
 ENTRYPOINT []
-CMD ["python3", "-m", "uvicorn", "app:app", "--host", "0.0.0.0", "--port", "8080", "--reload"]
+CMD ["python3", "-m", "uvicorn", "app:app", "--host", "0.0.0.0", "--port", "8080"]

@@ -40,7 +40,6 @@ run: ## Run the container
 		-e MAX_COMPACT_TOKENS=$(MAX_COMPACT_TOKENS) \
 		-e MAX_ACTIONS=$(MAX_ACTIONS) \
 		-e TEMPERATURE=$(TEMPERATURE) \
-		-e CUDA_HOME=/usr/local/cuda \
 		-v $(CURDIR)/app.py:/app/app.py:ro \
 		$(IMAGE_NAME)
 	@echo "✅ Container started. Run 'make logs' to watch."
