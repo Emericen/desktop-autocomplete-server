@@ -1,5 +1,5 @@
 # Config (override via env or command line)
-export MODEL           ?= Qwen/Qwen3-VL-8B-Instruct
+export MODEL           ?= Qwen/Qwen3-VL-32B-Instruct-FP8
 export DTYPE           ?= auto
 export TENSOR_PARALLEL ?= 1
 export GPUS            ?= all
@@ -40,6 +40,7 @@ run: ## Run the container
 		-e MAX_COMPACT_TOKENS=$(MAX_COMPACT_TOKENS) \
 		-e MAX_ACTIONS=$(MAX_ACTIONS) \
 		-e TEMPERATURE=$(TEMPERATURE) \
+		-e VLLM_DEEP_GEMM_ENABLE=0 \
 		-v $(CURDIR)/app.py:/app/app.py:ro \
 		$(IMAGE_NAME)
 	@echo "✅ Container started. Run 'make logs' to watch."
