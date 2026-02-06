@@ -1,58 +1,59 @@
 # Config (override via env or command line)
-# export MODEL      ?= Qwen/Qwen3-VL-32B-Instruct-FP8
-export MODEL      ?= Qwen/Qwen3-VL-8B-Instruct
-export DTYPE      ?= auto
+export MODEL           ?= Qwen/Qwen3-VL-32B-Instruct-FP8
+export DTYPE           ?= auto
 export TENSOR_PARALLEL ?= 1
-export GPUS       ?= all
-export MAX_MODEL_LEN ?= 100000
-export MAX_IMAGE_COUNT ?= 100
-export TOOL_CALL_PARSER ?= hermes
-export HF_CACHE   ?= $(HOME)/.cache/huggingface
-# Internal: vLLM ↔ API communication
-export VLLM_PORT  ?= 8000
-# External: exposed to host
-export API_PORT   ?= 443
+export GPUS            ?= all
+export MAX_MODEL_LEN   ?= 100000
+export MAX_NUM_SEQS    ?= 128
+export GPU_MEMORY_UTILIZATION ?= 0.95
+export HF_CACHE        ?= $(HOME)/.cache/huggingface
+export API_PORT        ?= 443
 export MAX_PREDICT_TOKENS ?= 100
 export MAX_COMPACT_TOKENS ?= 200
-export TEMPERATURE ?= 0.0
+export MAX_ACTIONS     ?= 0
+export TEMPERATURE     ?= 0.0
 
-# Performance & Memory
-export GPU_MEMORY_UTILIZATION ?= 0.95
-export MAX_NUM_SEQS ?= 128
-export PREFIX_CACHING_HASH_ALGO ?= xxhash
+IMAGE_NAME ?= desktop-autocomplete
+CONTAINER  ?= desktop-autocomplete
 
-.PHONY: up down restart logs logs-vllm logs-api shell warmup build clean
+.PHONY: build run stop restart logs shell clean
 
-up: ## Start all services
-	docker compose up -d
-	@echo "✅ Services starting. Run 'make logs' to watch."
+build: ## Build the Docker image
+	docker build -t $(IMAGE_NAME) .
+	@echo "✅ Image built: $(IMAGE_NAME)"
 
-down: ## Stop all services
-	docker compose down
+run: ## Run the container
+	docker run -d \
+		--name $(CONTAINER) \
+		--gpus $(GPUS) \
+		--ipc=host \
+		--shm-size=16g \
+		-p $(API_PORT):8080 \
+		-v $(HF_CACHE):/root/.cache/huggingface \
+		-e MODEL=$(MODEL) \
+		-e DTYPE=$(DTYPE) \
+		-e TENSOR_PARALLEL=$(TENSOR_PARALLEL) \
+		-e MAX_MODEL_LEN=$(MAX_MODEL_LEN) \
+		-e MAX_NUM_SEQS=$(MAX_NUM_SEQS) \
+		-e GPU_MEMORY_UTILIZATION=$(GPU_MEMORY_UTILIZATION) \
+		-e MAX_PREDICT_TOKENS=$(MAX_PREDICT_TOKENS) \
+		-e MAX_COMPACT_TOKENS=$(MAX_COMPACT_TOKENS) \
+		-e MAX_ACTIONS=$(MAX_ACTIONS) \
+		-e TEMPERATURE=$(TEMPERATURE) \
+		-v $(CURDIR)/app.py:/app/app.py:ro \
+		$(IMAGE_NAME)
+	@echo "✅ Container started. Run 'make logs' to watch."
 
-restart: down up ## Restart all services
+stop: ## Stop the container
+	docker stop $(CONTAINER) && docker rm $(CONTAINER)
 
-logs: ## Tail all logs
-	docker compose logs -f
+restart: stop run ## Restart the container
 
-logs-vllm: ## Tail vLLM logs only
-	docker compose logs -f vllm
+logs: ## Tail container logs
+	docker logs -f $(CONTAINER)
 
-logs-api: ## Tail API logs only
-	docker compose logs -f api
+shell: ## Shell into the container
+	docker exec -it $(CONTAINER) /bin/bash
 
-shell: ## Shell into vLLM container
-	docker compose exec vllm /bin/bash
-
-build: ## Rebuild API container
-	docker compose build api
-
-restart-api: ## Restart only the API container (keeps vLLM running)
-	docker compose restart api
-
-warmup: ## Preload vision processor
-	@echo "Sending warmup request..."
-	@curl -s -X POST http://localhost:$(API_PORT)/health -o /dev/null -w "API ready (%{http_code})\n"
-
-clean: down ## Stop and remove images
-	docker compose down --rmi all --volumes
+clean: stop ## Stop and remove image
+	docker rmi $(IMAGE_NAME)

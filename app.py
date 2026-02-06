@@ -5,19 +5,23 @@ import uuid
 from contextlib import asynccontextmanager
 from typing import Any
 
-import httpx
-import openai
 from fastapi import FastAPI
 from pydantic import BaseModel
+from vllm import LLM, SamplingParams
 
 # Config
-VLLM_BASE_URL = os.getenv("VLLM_BASE_URL", "http://localhost:8000/v1")
 MODEL = os.getenv("MODEL", "Qwen/Qwen3-VL-32B-Instruct-FP8")
-API_KEY = os.getenv("API_KEY", "EMPTY")
+TENSOR_PARALLEL = int(os.getenv("TENSOR_PARALLEL", "1"))
+DTYPE = os.getenv("DTYPE", "auto")
+MAX_MODEL_LEN = int(os.getenv("MAX_MODEL_LEN", "100000"))
+GPU_MEMORY_UTILIZATION = float(os.getenv("GPU_MEMORY_UTILIZATION", "0.95"))
+MAX_NUM_SEQS = int(os.getenv("MAX_NUM_SEQS", "128"))
 MAX_PREDICT_TOKENS = int(os.getenv("MAX_PREDICT_TOKENS", "100"))
 MAX_COMPACT_TOKENS = int(os.getenv("MAX_COMPACT_TOKENS", "300"))
+MAX_ACTIONS = int(
+    os.getenv("MAX_ACTIONS", "0")
+)  # 0 = unlimited, N = sliding window of last N action pairs
 TEMPERATURE = float(os.getenv("TEMPERATURE", "0.0"))
-VLLM_HEALTH_URL = VLLM_BASE_URL.rsplit("/v1", 1)[0] + "/health"
 
 SYSTEM_PROMPT = """You are a desktop autocomplete assistant.
 
@@ -49,8 +53,8 @@ COMPACT_PROMPT = """Summarize the user's recent actions into a brief paragraph. 
 # Session state: {session_id: {"clipboard": [...], "actions": [], "tokens": 0}}
 sessions: dict[str, dict] = {}
 
-# OpenAI client
-client = openai.OpenAI(api_key=API_KEY, base_url=VLLM_BASE_URL)
+# Global LLM instance
+llm: LLM | None = None
 
 
 # Request/Response models
@@ -88,13 +92,6 @@ class PredictResponse(BaseModel):
     suggestion: str | None = None
     source: str | None = None
     bbox: list[int] | None = None
-
-
-class TestRequest(BaseModel):
-    model: str
-    messages: list[dict[str, Any]]
-    max_tokens: int = 50
-    temperature: float = 0.0
 
 
 def get_session(sid: str) -> dict:
@@ -143,25 +140,38 @@ def call_model(
     max_tokens: int = MAX_PREDICT_TOKENS,
     system_prompt: str = SYSTEM_PROMPT,
 ) -> tuple[str, int]:
-    """Call model and return (content, prompt_tokens)."""
-    response = client.chat.completions.create(
-        model=MODEL,
-        messages=[
-            {"role": "system", "content": system_prompt},
-            {"role": "user", "content": content},
-        ],
-        max_tokens=max_tokens,
-        temperature=TEMPERATURE,
-    )
-    prompt_tokens = response.usage.prompt_tokens if response.usage else 0
+    sampling_params = SamplingParams(temperature=TEMPERATURE, max_tokens=max_tokens)
+    messages = [
+        {"role": "system", "content": system_prompt},
+        {"role": "user", "content": content},
+    ]
+    outputs = llm.chat([messages], sampling_params=sampling_params, use_tqdm=False)
+    generated_text = outputs[0].outputs[0].text
+    prompt_tokens = len(outputs[0].prompt_token_ids)
+
     # Track tokens in session
     if sid and sid in sessions:
         sessions[sid]["tokens"] = prompt_tokens
-    return response.choices[0].message.content, prompt_tokens
+
+    return generated_text, prompt_tokens
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    global llm
+    llm = LLM(
+        model=MODEL,
+        tensor_parallel_size=TENSOR_PARALLEL,
+        dtype=DTYPE,
+        trust_remote_code=True,
+        max_model_len=MAX_MODEL_LEN,
+        gpu_memory_utilization=GPU_MEMORY_UTILIZATION,
+        max_num_seqs=MAX_NUM_SEQS,
+        enable_prefix_caching=True,
+        limit_mm_per_prompt={"image": 100},
+        mm_processor_kwargs={"min_pixels": 784, "max_pixels": 2073600},
+    )
+    # Warmup
     call_model(None, [{"type": "text", "text": "hi"}], max_tokens=1)
     yield
 
@@ -171,25 +181,7 @@ app = FastAPI(lifespan=lifespan)
 
 @app.get("/health")
 async def health():
-    try:
-        async with httpx.AsyncClient(timeout=5.0) as http:
-            r = await http.get(VLLM_HEALTH_URL)
-            vllm_ok = r.status_code == 200
-    except Exception:
-        vllm_ok = False
-    return {"ok": vllm_ok, "api": True, "vllm": vllm_ok}
-
-
-@app.post("/test")
-def test(req: TestRequest):
-    """Raw passthrough to vLLM for testing."""
-    response = client.chat.completions.create(
-        model=req.model,
-        messages=req.messages,
-        max_tokens=req.max_tokens,
-        temperature=req.temperature,
-    )
-    return response.model_dump()
+    return {"ok": llm is not None, "model": MODEL}
 
 
 @app.post("/clipboard", response_model=ActionResponse)
@@ -209,6 +201,16 @@ async def add_action(req: ActionRequest):
     if not session["actions"]:
         session["actions"].append({"type": "text", "text": "Recent Actions:"})
     session["actions"].extend(req.blocks)
+
+    # Sliding window: keep header + last MAX_ACTIONS pairs (each pair = text label + image)
+    if MAX_ACTIONS > 0:
+        header = session["actions"][:1]  # "Recent Actions:" text block
+        pairs = session["actions"][1:]  # action pairs after header
+        max_blocks = MAX_ACTIONS * 2
+        if len(pairs) > max_blocks:
+            pairs = pairs[-max_blocks:]
+        session["actions"] = header + pairs
+
     content = session["clipboard"] + session["actions"]
     _, prompt_tokens = call_model(req.session_id, content, max_tokens=1)
     return ActionResponse(session_id=req.session_id, prompt_tokens=prompt_tokens)
@@ -216,16 +218,10 @@ async def add_action(req: ActionRequest):
 
 @app.post("/predict", response_model=PredictResponse)
 async def predict(req: SessionRequest):
-    """Generate autocomplete suggestion with reasoning."""
     session = get_session(req.session_id)
     content = session["clipboard"] + session["actions"]
-    raw, prompt_tokens = call_model(
-        req.session_id, content, max_tokens=300  # More tokens for reasoning
-    )
-
-    # Parse reasoning response
+    raw, prompt_tokens = call_model(req.session_id, content, max_tokens=300)
     parsed = parse_reasoning_response(raw)
-
     return PredictResponse(
         session_id=req.session_id,
         prompt_tokens=prompt_tokens,
@@ -239,33 +235,23 @@ async def predict(req: SessionRequest):
 
 @app.post("/compact", response_model=CompactResponse)
 async def compact(req: SessionRequest):
-    """Summarize actions into a short text, clear actions, return new token count."""
     session = get_session(req.session_id)
-
-    # Build content: clipboard + actions + compact instruction
     content = (
         session["clipboard"]
         + session["actions"]
         + [{"type": "text", "text": f"\n\n{COMPACT_PROMPT}"}]
     )
-
-    # Get summary
     summary, _ = call_model(
         req.session_id,
         content,
         max_tokens=MAX_COMPACT_TOKENS,
         system_prompt=COMPACT_PROMPT,
     )
-
-    # Replace actions with summary
     session["actions"] = [
         {"type": "text", "text": f"...\n[Previous Actions Summary]\n{summary}"}
     ]
-
-    # Get new token count
     new_content = session["clipboard"] + session["actions"]
     _, prompt_tokens = call_model(req.session_id, new_content, max_tokens=1)
-
     return CompactResponse(
         session_id=req.session_id, prompt_tokens=prompt_tokens, summary=summary
     )

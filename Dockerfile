@@ -1,16 +1,16 @@
-FROM python:3.12-slim
+FROM vllm/vllm-openai:v0.11.0
 
 WORKDIR /app
 
-# Install uv
-RUN pip install uv
-
+# Install dependencies on top of vLLM base image
 COPY requirements.txt .
-RUN uv pip install --system --no-cache -r requirements.txt
+RUN pip install --no-cache-dir -r requirements.txt
 
-COPY *.py .
+COPY app.py .
 
 ENV API_PORT=8080
 EXPOSE ${API_PORT}
 
-CMD uvicorn app:app --host 0.0.0.0 --port ${API_PORT}
+# Override the vLLM entrypoint so we run our own FastAPI app
+ENTRYPOINT []
+CMD ["python3", "-m", "uvicorn", "app:app", "--host", "0.0.0.0", "--port", "8080"]
