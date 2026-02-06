@@ -2,8 +2,9 @@ FROM vllm/vllm-openai:v0.11.0
 
 WORKDIR /app
 
-# Install FastAPI + uvicorn on top of vLLM base image
-RUN pip install --no-cache-dir fastapi==0.128.0 uvicorn==0.40.0
+# Install dependencies on top of vLLM base image
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
 
 COPY app.py .
 
