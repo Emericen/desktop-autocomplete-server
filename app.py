@@ -5,19 +5,20 @@ import uuid
 from contextlib import asynccontextmanager
 from typing import Any
 
-import httpx
-import openai
 from fastapi import FastAPI
 from pydantic import BaseModel
+from vllm import LLM, SamplingParams
 
 # Config
-VLLM_BASE_URL = os.getenv("VLLM_BASE_URL", "http://localhost:8000/v1")
 MODEL = os.getenv("MODEL", "Qwen/Qwen3-VL-32B-Instruct-FP8")
-API_KEY = os.getenv("API_KEY", "EMPTY")
+TENSOR_PARALLEL = int(os.getenv("TENSOR_PARALLEL", "1"))
+DTYPE = os.getenv("DTYPE", "auto")
+MAX_MODEL_LEN = int(os.getenv("MAX_MODEL_LEN", "100000"))
+GPU_MEMORY_UTILIZATION = float(os.getenv("GPU_MEMORY_UTILIZATION", "0.95"))
+MAX_NUM_SEQS = int(os.getenv("MAX_NUM_SEQS", "128"))
 MAX_PREDICT_TOKENS = int(os.getenv("MAX_PREDICT_TOKENS", "100"))
 MAX_COMPACT_TOKENS = int(os.getenv("MAX_COMPACT_TOKENS", "300"))
 TEMPERATURE = float(os.getenv("TEMPERATURE", "0.0"))
-VLLM_HEALTH_URL = VLLM_BASE_URL.rsplit("/v1", 1)[0] + "/health"
 
 SYSTEM_PROMPT = """You are a desktop autocomplete assistant.
 
@@ -49,8 +50,8 @@ COMPACT_PROMPT = """Summarize the user's recent actions into a brief paragraph. 
 # Session state: {session_id: {"clipboard": [...], "actions": [], "tokens": 0}}
 sessions: dict[str, dict] = {}
 
-# OpenAI client
-client = openai.OpenAI(api_key=API_KEY, base_url=VLLM_BASE_URL)
+# Global LLM instance
+llm: LLM | None = None
 
 
 # Request/Response models
@@ -88,13 +89,6 @@ class PredictResponse(BaseModel):
     suggestion: str | None = None
     source: str | None = None
     bbox: list[int] | None = None
-
-
-class TestRequest(BaseModel):
-    model: str
-    messages: list[dict[str, Any]]
-    max_tokens: int = 50
-    temperature: float = 0.0
 
 
 def get_session(sid: str) -> dict:
@@ -143,25 +137,44 @@ def call_model(
     max_tokens: int = MAX_PREDICT_TOKENS,
     system_prompt: str = SYSTEM_PROMPT,
 ) -> tuple[str, int]:
-    """Call model and return (content, prompt_tokens)."""
-    response = client.chat.completions.create(
-        model=MODEL,
-        messages=[
-            {"role": "system", "content": system_prompt},
-            {"role": "user", "content": content},
-        ],
-        max_tokens=max_tokens,
+    """Call model via offline LLM and return (content, prompt_tokens)."""
+    sampling_params = SamplingParams(
         temperature=TEMPERATURE,
+        max_tokens=max_tokens,
     )
-    prompt_tokens = response.usage.prompt_tokens if response.usage else 0
+
+    messages = [
+        {"role": "system", "content": system_prompt},
+        {"role": "user", "content": content},
+    ]
+
+    outputs = llm.chat([messages], sampling_params=sampling_params)
+    generated_text = outputs[0].outputs[0].text
+    prompt_tokens = len(outputs[0].prompt_token_ids)
+
     # Track tokens in session
     if sid and sid in sessions:
         sessions[sid]["tokens"] = prompt_tokens
-    return response.choices[0].message.content, prompt_tokens
+
+    return generated_text, prompt_tokens
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    global llm
+    llm = LLM(
+        model=MODEL,
+        tensor_parallel_size=TENSOR_PARALLEL,
+        dtype=DTYPE,
+        trust_remote_code=True,
+        max_model_len=MAX_MODEL_LEN,
+        gpu_memory_utilization=GPU_MEMORY_UTILIZATION,
+        max_num_seqs=MAX_NUM_SEQS,
+        enable_prefix_caching=True,
+        limit_mm_per_prompt={"image": 100},
+        mm_processor_kwargs={"min_pixels": 784, "max_pixels": 2073600},
+    )
+    # Warmup
     call_model(None, [{"type": "text", "text": "hi"}], max_tokens=1)
     yield
 
@@ -171,25 +184,7 @@ app = FastAPI(lifespan=lifespan)
 
 @app.get("/health")
 async def health():
-    try:
-        async with httpx.AsyncClient(timeout=5.0) as http:
-            r = await http.get(VLLM_HEALTH_URL)
-            vllm_ok = r.status_code == 200
-    except Exception:
-        vllm_ok = False
-    return {"ok": vllm_ok, "api": True, "vllm": vllm_ok}
-
-
-@app.post("/test")
-def test(req: TestRequest):
-    """Raw passthrough to vLLM for testing."""
-    response = client.chat.completions.create(
-        model=req.model,
-        messages=req.messages,
-        max_tokens=req.max_tokens,
-        temperature=req.temperature,
-    )
-    return response.model_dump()
+    return {"ok": llm is not None, "model": MODEL}
 
 
 @app.post("/clipboard", response_model=ActionResponse)
