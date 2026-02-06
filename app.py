@@ -18,7 +18,9 @@ GPU_MEMORY_UTILIZATION = float(os.getenv("GPU_MEMORY_UTILIZATION", "0.95"))
 MAX_NUM_SEQS = int(os.getenv("MAX_NUM_SEQS", "128"))
 MAX_PREDICT_TOKENS = int(os.getenv("MAX_PREDICT_TOKENS", "100"))
 MAX_COMPACT_TOKENS = int(os.getenv("MAX_COMPACT_TOKENS", "300"))
-MAX_ACTIONS = int(os.getenv("MAX_ACTIONS", "0"))  # 0 = unlimited, N = sliding window of last N action pairs
+MAX_ACTIONS = int(
+    os.getenv("MAX_ACTIONS", "0")
+)  # 0 = unlimited, N = sliding window of last N action pairs
 TEMPERATURE = float(os.getenv("TEMPERATURE", "0.0"))
 
 SYSTEM_PROMPT = """You are a desktop autocomplete assistant.
@@ -138,17 +140,11 @@ def call_model(
     max_tokens: int = MAX_PREDICT_TOKENS,
     system_prompt: str = SYSTEM_PROMPT,
 ) -> tuple[str, int]:
-    """Call model via offline LLM and return (content, prompt_tokens)."""
-    sampling_params = SamplingParams(
-        temperature=TEMPERATURE,
-        max_tokens=max_tokens,
-    )
-
+    sampling_params = SamplingParams(temperature=TEMPERATURE, max_tokens=max_tokens)
     messages = [
         {"role": "system", "content": system_prompt},
         {"role": "user", "content": content},
     ]
-
     outputs = llm.chat([messages], sampling_params=sampling_params, use_tqdm=False)
     generated_text = outputs[0].outputs[0].text
     prompt_tokens = len(outputs[0].prompt_token_ids)
@@ -209,7 +205,7 @@ async def add_action(req: ActionRequest):
     # Sliding window: keep header + last MAX_ACTIONS pairs (each pair = text label + image)
     if MAX_ACTIONS > 0:
         header = session["actions"][:1]  # "Recent Actions:" text block
-        pairs = session["actions"][1:]   # action pairs after header
+        pairs = session["actions"][1:]  # action pairs after header
         max_blocks = MAX_ACTIONS * 2
         if len(pairs) > max_blocks:
             pairs = pairs[-max_blocks:]
@@ -222,16 +218,10 @@ async def add_action(req: ActionRequest):
 
 @app.post("/predict", response_model=PredictResponse)
 async def predict(req: SessionRequest):
-    """Generate autocomplete suggestion with reasoning."""
     session = get_session(req.session_id)
     content = session["clipboard"] + session["actions"]
-    raw, prompt_tokens = call_model(
-        req.session_id, content, max_tokens=300  # More tokens for reasoning
-    )
-
-    # Parse reasoning response
+    raw, prompt_tokens = call_model(req.session_id, content, max_tokens=300)
     parsed = parse_reasoning_response(raw)
-
     return PredictResponse(
         session_id=req.session_id,
         prompt_tokens=prompt_tokens,
@@ -245,33 +235,23 @@ async def predict(req: SessionRequest):
 
 @app.post("/compact", response_model=CompactResponse)
 async def compact(req: SessionRequest):
-    """Summarize actions into a short text, clear actions, return new token count."""
     session = get_session(req.session_id)
-
-    # Build content: clipboard + actions + compact instruction
     content = (
         session["clipboard"]
         + session["actions"]
         + [{"type": "text", "text": f"\n\n{COMPACT_PROMPT}"}]
     )
-
-    # Get summary
     summary, _ = call_model(
         req.session_id,
         content,
         max_tokens=MAX_COMPACT_TOKENS,
         system_prompt=COMPACT_PROMPT,
     )
-
-    # Replace actions with summary
     session["actions"] = [
         {"type": "text", "text": f"...\n[Previous Actions Summary]\n{summary}"}
     ]
-
-    # Get new token count
     new_content = session["clipboard"] + session["actions"]
     _, prompt_tokens = call_model(req.session_id, new_content, max_tokens=1)
-
     return CompactResponse(
         session_id=req.session_id, prompt_tokens=prompt_tokens, summary=summary
     )
