@@ -1,60 +1,50 @@
 # Inference Server
 
-Stateful FastAPI server wrapping vLLM for vision-language inference with session management.
+Single-container FastAPI server with vLLM's offline `LLM` class for vision-language inference with session management.
 
 ## Quick Start
 
 ```bash
-# Start services (vLLM + FastAPI)
-make up
-
-# Check logs
-make logs
+# Build image, start container, tail logs
+make build && make run && make logs
 ```
 
-## Warmup
+## Architecture
 
-The API automatically warms up vLLM on startup. Compose ensures vLLM is healthy before starting the API container.
-
-To manually verify readiness:
-
-```bash
-make warmup
-```
-
-## Traffic Routing (Port 443)
-
-To expose on port 443 (requires iptables since 443 is privileged):
-
-```bash
-# Add redirect (after warmup)
-sudo iptables -t nat -A PREROUTING -p tcp --dport 443 -j REDIRECT --to-port 8080
-
-# Verify
-sudo iptables -t nat -L PREROUTING -n --line-numbers
-
-# Remove (if needed)
-sudo iptables -t nat -F PREROUTING
-```
+The server embeds vLLM's offline `LLM` class directly in the FastAPI process — no separate vLLM server or docker compose needed. The model loads on startup via the FastAPI lifespan hook.
 
 ## Endpoints
 
 | Endpoint | Method | Description |
 |----------|--------|-------------|
-| `/health` | GET | Health check (returns API and vLLM status) |
-| `/predict` | POST | Add action to session, get prediction |
+| `/health` | GET | Health check (model loaded status) |
+| `/clipboard` | POST | Set clipboard content for a session |
+| `/action` | POST | Add user actions to a session |
+| `/predict` | POST | Generate autocomplete suggestion |
+| `/compact` | POST | Summarize actions to reduce token count |
+| `/session/{id}` | GET | Debug: view full session state |
 
 ## Commands
 
 ```bash
-make up        # Start vLLM + FastAPI
-make down      # Stop all services
-make restart   # Restart all
-make logs      # Tail combined logs
-make logs-vllm # Tail vLLM logs only
-make logs-api  # Tail API logs only
-make shell     # Shell into vLLM container
-make build     # Rebuild API container
-make warmup    # Check API readiness
-make clean     # Stop and remove images
+make build     # Build the Docker image
+make run       # Start the container (GPU)
+make stop      # Stop and remove container
+make restart   # Restart container
+make logs      # Tail container logs
+make shell     # Shell into container
+make clean     # Stop and remove image
 ```
+
+## Configuration
+
+All configurable via environment variables or Makefile overrides:
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `MODEL` | `Qwen/Qwen3-VL-8B-Instruct` | HuggingFace model ID |
+| `TENSOR_PARALLEL` | `1` | Number of GPUs for tensor parallelism |
+| `MAX_MODEL_LEN` | `100000` | Maximum sequence length |
+| `GPU_MEMORY_UTILIZATION` | `0.95` | GPU memory fraction for KV cache |
+| `API_PORT` | `443` | Host port mapped to container |
+| `TEMPERATURE` | `0.0` | Sampling temperature |

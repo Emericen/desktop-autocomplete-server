@@ -10,4 +10,6 @@ COPY app.py .
 ENV API_PORT=8080
 EXPOSE ${API_PORT}
 
-CMD uvicorn app:app --host 0.0.0.0 --port ${API_PORT}
+# Override the vLLM entrypoint so we run our own FastAPI app
+ENTRYPOINT []
+CMD ["python", "-m", "uvicorn", "app:app", "--host", "0.0.0.0", "--port", "8080"]
